@@ -10,126 +10,72 @@ action = str(sys.argv[1])
 technique = str(sys.argv[2])
 dtype = str(sys.argv[3])
 ipFilepath = str(sys.argv[4])
-#ipFilepath = '../ADM-2020-Assignment-2-data-T-SF-1/l_suppkey-int16.csv'
+
+opFilepath = '../outputs/out.csv'
 
 print("Action:",action)
 print("Technique:",technique)
 print("Datatype:",dtype)
 print("Input Filepath:",ipFilepath)
+print("Output Filepath:",opFilepath)
 
 
-# ### String
+# ##### Encode
 
-# #### String Decode
+from itertools import chain, groupby
 
-def decode(our_message):
-    decoded_message = ""
-    i = 0
-    j = 0
-    # splitting the encoded message into respective counts
-    while (i <= len(our_message) - 1):
-        run_count = int(our_message[i])
-        run_word = our_message[i + 1]
-        # displaying the character multiple times specified by the count
-        for j in range(run_count):
-            # concatenated with the decoded message
-            decoded_message = decoded_message+run_word
-            j = j + 1
-        i = i + 2
-    return decoded_message
+def run_length(iterable):
+    return list(chain.from_iterable(
+        (val[:-1], len([*thing]))
+        for val, thing in groupby(iterable)
+    ))
 
 
-
-
-def string_decode(ipFilepath, opFilepath):
+def rle_encode(ipFilepath, opFilepath):
     
-    with open(ipFilepath) as file:
-        encodedLines = file.readlines()
-        
-    start = time.time()
-    decoded_lines = []
-    for line in encodedLines:
-        decoded_lines.append(decode(line))
-    end = time.time()
-    print("Time for Decode:",str(end-start))
-    
-    decoded_file = open(opFilepath, "w")
-    for line in decoded_lines:
-        decoded_file.write(line)
-    decoded_file.close()
-
-
-# #### String encode
-
-
-def encode_message(message):
-    encoded_string = ""
-    i = 0
-    while (i <= len(message)-1):
-        count = 1
-        ch = message[i]
-        j = i
-        while (j < len(message)-1): 
-#         '''if the character at the current index is the same as the character at the next index. If the characters are the same, the count is incremented to 1'''    
-            if (message[j] == message[j + 1]): 
-                count = count + 1
-                j = j + 1
-            else: 
-                break
-        '''the count and the character is concatenated to the encoded string'''
-        encoded_string = encoded_string + str(count) + ch
-        i = j + 1
-    return encoded_string
-
-
-
-def string_encode(ipFilepath, opFilepath):
-
     with open(ipFilepath) as file:
         lines = file.readlines()
         
     start = time.time()
-    encoded_lines = []
-    for line in lines:
-        encoded_lines.append(encode_message(line))
+    encodedList = run_length(lines)
+    encodedStr = ''
+    for i in encodedList:
+        encodedStr+=str(i)+'#'
     end = time.time()
     print("Time for Encode:",str(end-start))
-    
+        
     encoded_file = open(opFilepath, "w")
-    for line in encoded_lines:
-        encoded_file.write(line)
+    n = encoded_file.write(encodedStr)
     encoded_file.close()
 
 
-# ##### Use encode-decode
+# ##### Decode
 
 
-# ipFilepath = '../ADM-2020-Assignment-2-data-T-SF-1/l_comment-string.csv'
-# opFilepath = '../outputs/l_comment-string-en.csv'
-# string_encode(ipFilepath, opFilepath)
+def rle_decode(ipFilepath, opFilepath):
+    
+    with open(ipFilepath) as file:
+        lines = file.readlines()
+        
+    start = time.time()
+    tlist = lines[0].split(sep='#')
+    decStr = ''
+    for i in range(0, len(tlist)):
+        if i%2!=0:
+            mul = int(tlist[i])
+            for j in range(0, mul):
+                decStr+=tlist[i-1]+'\n'
+    end = time.time()
+    print("Time for Decode:",str(end-start))
+    
+    decoded_file = open(opFilepath, "w")
+    for line in decStr:
+        decoded_file.write(line)
+    decoded_file.close()
 
 
 
-# ipFilepath = '../outputs/l_comment-string-en.csv'
-# opFilepath = '../outputs/l_comment-string-de.csv'
-# string_decode(ipFilepath, opFilepath)
-
-
-# ##### Use encode-decode again
-
-
-# ipFilepath = '../ADM-2020-Assignment-2-data-T-SF-1/l_commitdate-string.csv'
-# opFilepath = '../outputs/l_commitdate-string-en.csv'
-# string_encode(ipFilepath, opFilepath)
-
-
-# ipFilepath = '../outputs/l_commitdate-string-en.csv'
-# opFilepath = '../outputs/l_commitdate-string-de.csv'
-# string_decode(ipFilepath, opFilepath)
-
-
-# ### int8
-
+#RLE Modified - Works only for single digit numbers, but works better than standard RLE
 # #### Encode
 
 def encode_ints(data):
@@ -242,163 +188,25 @@ def int8_decode(ipFilepath, opFilepath):
     decoded_file.close()
 
 
-# ##### Use encode/Decode
-
-# ipFilepath = '../ADM-2020-Assignment-2-data-T-SF-1/l_discount-int8.csv'
-# opFilepath = '../outputs/l_discount-int8-en.csv'
-# int8_encode(ipFilepath, opFilepath)
-
-
-# ipFilepath = '../outputs/l_discount-int8-en.csv'
-# opFilepath = '../outputs/l_discount-int8-de.csv'
-# decode_int8(ipFilepath, opFilepath)
-
-
-# ##### Use encode/Decode Again
-
-# ipFilepath = '../ADM-2020-Assignment-2-data-T-SF-1/l_linenumber-int8.csv'
-# opFilepath = '../outputs/l_linenumber-int8-en.csv'
-# int8_encode(ipFilepath, opFilepath)
-
-
-# ipFilepath = '../outputs/l_linenumber-int8-en.csv'
-# opFilepath = '../outputs/l_linenumber-int8-de.csv'
-# decode_int8(ipFilepath, opFilepath)
-
-
-# ##### Use encode/Decode Again
-
-# ipFilepath = '../ADM-2020-Assignment-2-data-T-SF-1/l_quantity-int8.csv'
-# opFilepath = '../outputs/l_quantity-int8-en.csv'
-# int8_encode(ipFilepath, opFilepath)
-
-
-# ipFilepath = '../outputs/l_quantity-int8-en.csv'
-# opFilepath = '../outputs/l_quantity-int8-de.csv'
-# decode_int8(ipFilepath, opFilepath)
-
-
-# ### int16
-
-# ##### Encode
-
-#https://stackoverflow.com/questions/46572023/run-length-encoding-python
-from itertools import chain, groupby
-
-def run_length(iterable):
-    return list(chain.from_iterable(
-        (val[:-1], len([*thing]))
-        for val, thing in groupby(iterable)
-    ))
-
-
-
-def int16_encode(ipFilepath, opFilepath):
-    
-    with open(ipFilepath) as file:
-        lines = file.readlines()
-        
-    start = time.time()
-    encodedList = run_length(lines)
-    encodedStr = ''
-    for i in encodedList:
-        encodedStr+=str(i)+' '
-    end = time.time()
-    print("Time for Encode:",str(end-start))
-        
-    encoded_file = open(opFilepath, "w")
-    n = encoded_file.write(encodedStr)
-    encoded_file.close()
-
-
-# ##### Decode
-
-
-def int16_decode(ipFilepath, opFilepath):
-    
-    with open(ipFilepath) as file:
-        lines = file.readlines()
-        
-    start = time.time()
-    tlist = lines[0].split()
-    decStr = ''
-    for i in range(0, len(tlist)):
-        if i%2!=0:
-            mul = int(tlist[i])
-            for j in range(0, mul):
-                decStr+=tlist[i-1]+'\n'
-    end = time.time()
-    print("Time for Decode:",str(end-start))
-    
-    decoded_file = open(opFilepath, "w")
-    for line in decStr:
-        decoded_file.write(line)
-    decoded_file.close()
-
-
-# ##### Trying Encode/Decode
-
-# ipFilepath = '../ADM-2020-Assignment-2-data-T-SF-1/l_suppkey-int16.csv'
-# opFilepath = '../outputs/l_suppkey-int16-en.csv'
-# int16_encode(ipFilepath, opFilepath)
-
-
-# ipFilepath = '../outputs/l_suppkey-int16-en.csv'
-# opFilepath = '../outputs/l_suppkey-int16-de.csv'
-# int16_decode(ipFilepath, opFilepath)
-
-
-# ipFilepath = '../ADM-2020-Assignment-2-data-T-SF-1/l_linenumber-int8.csv'
-# opFilepath = '../outputs/l_linenumber-int16-en.csv'
-# int16_encode(ipFilepath, opFilepath)
-
-
-# ipFilepath = '../outputs/l_linenumber-int16-en.csv'
-# opFilepath = '../outputs/l_linenumber-int16-de.csv'
-# int16_decode(ipFilepath, opFilepath)
-
-
-# # Combined in 1 function:
-
-# #arguments
-# action = 'en'
-# technique = 'rle'
-# dtype = 'int16'
-# ipFilepath = '../ADM-2020-Assignment-2-data-T-SF-1/l_suppkey-int16.csv'
-# # ipFilepath = '../outputs/out.csv'
-
-
 def execEncDec(action, technique, dtype, ipFilepath):
     
     opFilepath = '../outputs/out.csv'
     
-    if technique != 'rle':
-        return 0
-    
-    if dtype=='int8':
+    if technique == 'rle_mod':
         
         if action == 'en':
             int8_encode(ipFilepath, opFilepath)
-            
+
         elif action == 'de':
             int8_decode(ipFilepath, opFilepath)
-    
-    elif dtype == 'int16' or dtype == 'int32' or dtype == 'int64':
-        
-        if action == 'en':
-            int16_encode(ipFilepath, opFilepath)
-            
-        elif action == 'de':
-            int16_decode(ipFilepath, opFilepath)
-            
-    elif dtype == 'string':
-        
-        if action == 'en':
-            string_encode(ipFilepath, opFilepath)
-            
-        elif action == 'de':
-            string_decode(ipFilepath, opFilepath)
 
+    elif technique == 'rle':
+
+        if action == 'en':
+            rle_encode(ipFilepath, opFilepath)
+
+        elif action == 'de':
+            rle_decode(ipFilepath, opFilepath)
 
 execEncDec(action, technique, dtype, ipFilepath)
 
