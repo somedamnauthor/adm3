@@ -343,7 +343,69 @@ def dif_decode(path, data_type):
     decoded_file.close()
 
 
+""" for """
+def for_encode(path, data_type):
+    offset = 4
+    content = []
+    with open(path, 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            row = row[0]
+            content.append(row)
+    content = np.array(content).astype(int)
+    frame = int(np.median(content))
+    # print("Frame:", frame)
+    # output_file = "%sfor" % path[:-3]
+    output_file = opFilepath
 
+    if os.path.exists(output_file):
+        os.remove(output_file)
+
+    i = 0
+    with open(output_file, 'ab') as f:
+        f.write(frame.to_bytes(1, byteorder='big', signed=True))
+        for row in content:
+            enc = row - frame
+            if exception(enc, offset):
+                nbytes, nbits = bits_to_byte(data_type)
+                escape = int('-' + '1'*(nbits-1), 2)-1
+                f.write(escape.to_bytes(nbytes, byteorder='big', signed=True))  # write escape code (all bits 1)
+                f.write(int(row).to_bytes(nbytes, byteorder='big', signed=True))  # write original value (uncompressed)
+                i += 1
+            else:
+                f.write(int(enc).to_bytes(1, byteorder='big', signed=True))  # write compressed value
+        # print("exceptions occurred:", i)
+
+
+def for_decode(path, data_type):
+    decList = []
+    # input_file = "%sfor" % path[:-3]
+    input_file = path
+    nbytes, nbits = bits_to_byte(data_type)
+    escape = int('-' + '1' * (nbits - 1), 2) - 1
+    i = 0
+    with open(input_file, "rb") as f:
+        byte = f.read(1)
+        frame = int.from_bytes(byte, "big", signed=True)
+        # print(frame)
+        while byte != b"":
+            byte = f.read(1)
+            offset = int.from_bytes(byte, "big", signed=True)
+            if offset == escape:
+                byte = f.read(1)
+                val = int.from_bytes(byte, "big", signed=True)
+            else:
+                val = offset + frame
+            decList.append(val)
+            # print(val)
+            i += 1
+            # if i > 30:
+            #     break
+
+    decoded_file = open(opFilepath, "w")
+    for line in decList:
+        decoded_file.write(str(line)+"\n")
+    decoded_file.close()
 
 
 """ MASTER FUNCTION """
@@ -396,6 +458,15 @@ def execEncDec(action, technique, dtype, ipFilepath):
 
         elif action == 'de':
             dif_decode(ipFilepath, dtype)
+
+    elif technique == 'for':
+
+        if action == 'en':
+            for_encode(ipFilepath, dtype)
+
+        elif action == 'de':
+            for_decode(ipFilepath, dtype)
+
 
 
 
