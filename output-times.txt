@@ -1,8 +1,0 @@
-l_comment - 3.16s, 2.43s
-l_commitdate - 3.01s, 2.34s
-l_linestatus - 0.47s, 0.67s
-l_receiptdate - 14.6s
-l_returnflag - 0.98s
-l_shipdate - 14.86s
-l_shipinstruct - 18.77s
-l_shipinstruct - 2.38s
